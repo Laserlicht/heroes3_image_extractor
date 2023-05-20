@@ -35,6 +35,10 @@ def main():
         if filename.lower().endswith(".pak") and "x3" in filename:
             full_name = os.path.join(DIRECTORY_IN, filename)
             extract_pak(full_name)
+    for filename in os.listdir(os.path.join(DIRECTORY_IN, 'LOC', list(os.listdir(os.path.join(DIRECTORY_IN, 'LOC')))[0])):
+        if filename.lower().endswith(".pak") and "x3" in filename:
+            full_name = os.path.join(DIRECTORY_IN, 'LOC', list(os.listdir(os.path.join(DIRECTORY_IN, 'LOC')))[0], filename)
+            extract_pak(full_name)
 
 def extract_pak(file):
     with open(file, 'rb') as f:
@@ -75,24 +79,39 @@ def extract_pak(file):
                 else:
                     data_compressed += bytearray(f.read(zsize))
                 offset += chunk_zsize
-            data_compressed = zlib.decompress(data_compressed)
-            if len(data) < len(data_compressed): data = data_compressed
+            if len(data_compressed) != 0:
+                to_decompress = data_compressed
+                data_compressed = []
+                while len(to_decompress) > 0:
+                    dec = zlib.decompressobj()
+                    try:
+                        data_compressed.append(dec.decompress(to_decompress))
+                        to_decompress = dec.unused_data
+                    except:
+                        break
+                pass
+            if len(data) < len(data_compressed):
+                data = data_compressed
+            else:
+                data = [data]
             
             extract_images(os.path.basename(file), name, image_config, data)
 
 def extract_images(file, name, image_config, data):
-    img = Image.open(io.BytesIO(data))
+    img = [Image.open(io.BytesIO(x)) for x in data]
     for line in image_config.split('\r\n'):
         tmp = line.split(' ')
-        if len(tmp) == 12:
+        if len(tmp) > 11:
             img_name = tmp[0]
+            img_nr = int(tmp[1])
             img_x = int(tmp[6])
             img_y = int(tmp[7])
             img_width = int(tmp[8])
             img_height = int(tmp[9])
             img_rotation = int(tmp[10])
 
-            img_crop = img.crop((img_x, img_y, img_x+img_width, img_y+img_height))
+            img_crop = img[img_nr]
+            img_crop = img_crop.crop((img_x, img_y, img_x+img_width, img_y+img_height))
             img_crop = img_crop.rotate(-90 * img_rotation, expand=True)
 
             if 'sprite' in file.lower():
@@ -101,7 +120,8 @@ def extract_images(file, name, image_config, data):
             else:
                 if not os.path.exists(os.path.join(DIRECTORY_OUT, 'hd_extract', file)): os.makedirs(os.path.join(DIRECTORY_OUT, 'hd_extract', file), exist_ok=True)
                 img_crop.save(os.path.join(DIRECTORY_OUT, 'hd_extract', file, img_name + ".png"))
-    #img.save(os.path.join(DIRECTORY_OUT, 'hd_extract', file, name + ".png"))
+    #img[0].save(os.path.join(DIRECTORY_OUT, 'hd_extract', file, name + ".png"))
+    #open(os.path.join(DIRECTORY_OUT, 'hd_extract', file, name + ".dds"), 'wb').write(data[0])
 
 if __name__ == "__main__":
     main()

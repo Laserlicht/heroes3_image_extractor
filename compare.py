@@ -27,8 +27,6 @@ from PIL import Image
 import base64
 from io import BytesIO
 
-from mappinglist import mapping
-
 DIRECTORY_IN = r"R:"
 DIRECTORY_OUT = r"R:"
 
@@ -49,7 +47,7 @@ def main():
 
     html = "<html><body>"
     html += "<h1>Bitmap</h1>"
-    html += '<table style="border:1px solid black;border-collapse:collapse;"><tr><th style="border:1px solid black;">Name</th><th style="border:1px solid black;">Name (HD)</th><th style="border:1px solid black;">SD (complete)</th><th style="border:1px solid black;">HD</th></tr>'
+    html += '<table style="border:1px solid black;border-collapse:collapse;"><tr><th style="border:1px solid black;">Name</th><th style="border:1px solid black;">SD (complete)</th><th style="border:1px solid black;">HD</th></tr>'
     for item in bmp:
         item_images = {}
         for t in ['sd', 'hd']:
@@ -61,10 +59,10 @@ def main():
                 img.save(buffered, format="PNG")
                 img_b64 = base64.b64encode(buffered.getvalue()).decode()
                 item_images[t] += '<img src="data:image/png;base64,' + img_b64 + '" title="' + item + '" />'
-        html += '<tr><td style="border:1px solid black;">' + item + '</td><td style="border:1px solid black;">' + ('' if item not in mapping() else mapping()[item]) + '</td><td style="border:1px solid black;">' + item_images['sd'] + '</td><td style="border:1px solid black;">' + item_images['hd'] + "</td></tr>"
+        html += '<tr><td style="border:1px solid black;">' + item + '</td><td style="border:1px solid black;">' + item_images['sd'] + '</td><td style="border:1px solid black;">' + item_images['hd'] + "</td></tr>"
     html += "</table>"
     html += "<h1>Sprite</h1>"
-    html += '<table style="border:1px solid black;border-collapse:collapse;"><tr><th style="border:1px solid black;">Name</th><th style="border:1px solid black;">Name (HD)</th><th style="border:1px solid black;">SD (complete)</th><th style="border:1px solid black;">HD</th></tr>'
+    html += '<table style="border:1px solid black;border-collapse:collapse;"><tr><th style="border:1px solid black;">Name</th><th style="border:1px solid black;">SD (complete)</th><th style="border:1px solid black;">HD</th></tr>'
     for item in sprite:
         item_images = {}
         for t in ['sd', 'hd']:
@@ -78,7 +76,7 @@ def main():
                         img.save(buffered, format="PNG")
                         img_b64 = base64.b64encode(buffered.getvalue()).decode()
                         item_images[t] += '<img src="data:image/png;base64,' + img_b64 + '" title="' + image + '" />'
-        html += '<tr><td style="border:1px solid black;">' + item + '</td><td style="border:1px solid black;">' + ('' if item not in mapping() else mapping()[item]) + '</td><td style="border:1px solid black;">' + item_images['sd'] + '</td><td style="border:1px solid black;">' + item_images['hd'] + "</td></tr>"
+        html += '<tr><td style="border:1px solid black;">' + item + '</td><td style="border:1px solid black;">' + item_images['sd'] + '</td><td style="border:1px solid black;">' + item_images['hd'] + "</td></tr>"
     html += "</table>"
     html += "</html></body>"
 
